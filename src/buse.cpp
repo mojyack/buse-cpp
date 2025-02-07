@@ -40,11 +40,6 @@ namespace {
 using SigAction  = struct sigaction;
 using NBDRequest = struct nbd_request;
 using NBDReply   = struct nbd_reply;
-
-template <class... Args>
-auto print(Args... args) -> void {
-    (std::cout << ... << args) << std::endl;
-}
 } // namespace
 
 auto read_all(const int fd, std::byte* buf, size_t count) -> int {
@@ -77,10 +72,10 @@ auto disconnect_nbd(const int /*signal*/) -> void {
     }
 
     if(ioctl(dev_to_disconnect, NBD_DISCONNECT) != -1) {
-        print("sucessfuly requested disconnect on nbd device");
+        std::println("sucessfuly requested disconnect on nbd device");
         dev_to_disconnect = -1;
     } else {
-        print("failed to request disconect on nbd device");
+        std::println("failed to request disconect on nbd device");
     }
 }
 
@@ -89,7 +84,7 @@ auto set_sigaction(const int sig, const struct sigaction* const act) -> int {
     auto       oact = SigAction{};
     const auto r    = sigaction(sig, act, &oact);
     if(r == 0 && oact.sa_handler != SIG_DFL) {
-        printf("overriden non-default signal handler (%d: %s)", sig, strsignal(sig));
+        std::println("overriden non-default signal handler ({}: {})", sig, strsignal(sig));
     }
     return r;
 }
@@ -105,7 +100,7 @@ auto serve_nbd(const int socket, Operator& op) -> int {
 
 loop:
     const auto bytes_read = read(socket, &request, sizeof(request));
-    ensure(bytes_read == sizeof(request), bytes_read, " != ", sizeof(request));
+    ensure(bytes_read == sizeof(request), "{} != {}", bytes_read, sizeof(request));
     memcpy(reply.handle, request.handle, sizeof(reply.handle));
     reply.error     = htonl(0);
     const auto len  = ntohl(request.len);
@@ -190,16 +185,16 @@ auto run(const char* const nbd_path, Operator& op) -> int {
     /* serve NBD socket */
     auto status = serve_nbd(socket[0], op);
     if(close(socket[0]) != 0) {
-        print("problem closing server side nbd socket");
+        std::println("problem closing server side nbd socket");
     }
-    ensure(status == 0, status);
+    ensure(status == 0, "status={}", status);
     if(status != 0) {
         return status;
     }
 
     /* wait for subprocess */
     ensure(waitpid(pid, &status, 0) != -1);
-    ensure(WEXITSTATUS(status) == 0, WEXITSTATUS(status));
+    ensure(WEXITSTATUS(status) == 0, "status={}", WEXITSTATUS(status));
 
     return 0;
 }

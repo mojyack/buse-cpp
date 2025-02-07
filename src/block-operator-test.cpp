@@ -111,6 +111,6 @@ auto test() -> bool {
 
 auto main() -> int {
     ensure(test());
-    print("ok");
+    std::println("ok");
     return 0;
 }
