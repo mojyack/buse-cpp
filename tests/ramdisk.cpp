@@ -1,8 +1,8 @@
 #include <cstring>
 #include <vector>
 
-#include "block-operator.hpp"
-#include "buse.hpp"
+#include "buse/block-operator.hpp"
+#include "buse/buse.hpp"
 #include "util/argument-parser.hpp"
 
 struct Operator : buse::Operator {

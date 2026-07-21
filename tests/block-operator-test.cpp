@@ -4,7 +4,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include "block-operator.hpp"
+#include "buse/block-operator.hpp"
 #include "macros/assert.hpp"
 
 struct Operator : buse::BlockOperator {
